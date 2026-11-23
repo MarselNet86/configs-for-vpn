@@ -1,0 +1,124 @@
+{
+  "log": {
+    "loglevel": "warning"
+  },
+  "dns": {
+    "servers": [
+      {
+        "address": "https://dns.google/dns-query",
+        "skipFallback": false
+      }
+    ],
+    "queryStrategy": "UseIPv4"
+  },
+  "inbounds": [
+    {
+      "tag": "VLESS-REALITY",
+      "port": 443,
+      "listen": "0.0.0.0",
+      "protocol": "vless",
+      "settings": {
+        "clients": [],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "enabled": true,
+        "routeOnly": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ],
+        "metadataOnly": false
+      },
+      "streamSettings": {
+        "network": "raw",
+        "security": "reality",
+        "realitySettings": {
+          "dest": "127.0.0.1:8445",
+          "show": false,
+          "xver": 0,
+          "shortIds": [
+            "",
+            "REPLACE_WITH_SHORT_ID"
+          ],
+          "privateKey": "REPLACE_WITH_REALITY_PRIVATE_KEY",
+          "serverNames": [
+            "node.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "tag": "HY2",
+      "port": 443,
+      "listen": "0.0.0.0",
+      "protocol": "hysteria",
+      "settings": {
+        "clients": [],
+        "version": 2
+      },
+      "sniffing": {
+        "enabled": true,
+        "routeOnly": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ],
+        "metadataOnly": false
+      },
+      "streamSettings": {
+        "network": "hysteria",
+        "security": "tls",
+        "tlsSettings": {
+          "alpn": [
+            "h3"
+          ],
+          "certificates": [
+            {
+              "keyFile": "/etc/letsencrypt/live/node.example.com/privkey.pem",
+              "certificateFile": "/etc/letsencrypt/live/node.example.com/fullchain.pem"
+            }
+          ]
+        },
+        "hysteriaSettings": {
+          "version": 2,
+          "masquerade": {
+            "url": "https://node.example.com",
+            "type": "proxy",
+            "rewriteHost": true
+          }
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "DIRECT",
+      "protocol": "freedom"
+    },
+    {
+      "tag": "BLOCK",
+      "protocol": "blackhole"
+    }
+  ],
+  "routing": {
+    "rules": [
+      {
+        "ip": [
+          "geoip:private"
+        ],
+        "type": "field",
+        "outboundTag": "BLOCK"
+      },
+      {
+        "type": "field",
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "BLOCK"
+      }
+    ]
+  }
+}
